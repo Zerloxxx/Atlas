@@ -141,15 +141,23 @@ struct MovieCardView: View {
         }
         .padding(AppTheme.Layout.padding)
         .background(AppTheme.Colors.surface)
+        // Раньше это был голый крестик. После того как верх карточки занял
+        // широкий кадр из фильма, он поехал поверх фотографии и стал читаться
+        // как "закрыть фото", а не "убрать фильм из подборки" — поэтому теперь
+        // с подписью и на затемнённой плашке, чтобы не терялся на светлом кадре.
         .overlay(alignment: .topTrailing) {
             if let onDismiss {
                 Button(action: onDismiss) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(AppTheme.Colors.textSecondary)
-                        .padding(7)
-                        .background(AppTheme.Colors.surfaceElevated)
-                        .clipShape(Circle())
+                    HStack(spacing: 5) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 10, weight: .bold))
+                        Text("Не подходит")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(.black.opacity(0.55)))
                 }
                 .padding(10)
             }
