@@ -375,7 +375,7 @@ struct SwipeSessionHistoryView: View {
                         .foregroundStyle(AppTheme.Colors.textSecondary)
                 }
                 Spacer()
-                Text(entry.date.formatted(date: .abbreviated, time: .shortened))
+                Text(entry.date.ruShort)
                     .font(.system(size: 11))
                     .foregroundStyle(AppTheme.Colors.textSecondary)
             }

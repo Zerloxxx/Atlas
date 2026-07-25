@@ -3,10 +3,29 @@ import SwiftUI
 /// Точка входа в Атлас — выбор одного из сценариев подбора фильма.
 struct AIAssistantHomeView: View {
     private let catalog: MovieCatalogProviding = MovieCatalogService.shared
+    @ObservedObject private var history = RecommendationHistoryStore.shared
+
+    /// Последняя подборка, если она свежая — к ней предлагаем вернуться вместо
+    /// повторного прохождения опроса. Дальше недели это уже не "продолжить",
+    /// а обычная история, за ней — иконка часов в шапке.
+    private var resumableEntry: RecommendationHistoryEntry? {
+        guard let last = history.entries.first else { return nil }
+        guard Date().timeIntervalSince(last.date) < 7 * 24 * 60 * 60 else { return nil }
+        return last
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.Layout.spacing * 1.5) {
+                if let resumableEntry {
+                    NavigationLink {
+                        HistoryDetailView(entry: resumableEntry)
+                    } label: {
+                        resumeCard(resumableEntry)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 NavigationLink {
                     QuickPickFlowView()
                 } label: {
@@ -98,6 +117,45 @@ struct AIAssistantHomeView: View {
             }
             .padding(.top, 4)
         }
+    }
+
+    /// Ключевой сценарий из кейса: человек уже подобрал фильмы, отвлёкся и вышел,
+    /// так и не начав смотреть. Чтобы вернуться, ему не нужно заново отвечать на
+    /// вопросы — подборка сохранена, открываем её как есть.
+    private func resumeCard(_ entry: RecommendationHistoryEntry) -> some View {
+        HStack(spacing: AppTheme.Layout.spacing) {
+            Image(systemName: "arrow.trianglehead.clockwise")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(AppTheme.Colors.accent)
+                .frame(width: 52, height: 52)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Продолжить выбор")
+                    .font(AppTheme.Typography.headline)
+                    .foregroundStyle(AppTheme.Colors.textPrimary)
+                Text("\(entry.scenarioLabel) · \(entry.date.ruRelative)")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(AppTheme.Colors.textSecondary)
+                    .lineLimit(1)
+                Text("\(entry.items.count) фильмов уже подобрано — не нужно отвечать заново")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(AppTheme.Colors.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(AppTheme.Colors.textSecondary)
+        }
+        .padding(AppTheme.Layout.padding)
+        .background(AppTheme.Colors.accent.opacity(0.12))
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.Layout.cornerRadius)
+                .stroke(AppTheme.Colors.accent.opacity(0.45), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: AppTheme.Layout.cornerRadius))
     }
 
     /// Настоящий эмодзи — у Apple он уже цветной/объёмный из коробки,

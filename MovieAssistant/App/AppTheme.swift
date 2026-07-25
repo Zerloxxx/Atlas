@@ -61,6 +61,23 @@ enum AppTheme {
     }
 }
 
+extension Date {
+    /// Интерфейс целиком на русском, а даты по умолчанию берут язык устройства —
+    /// на телефоне с английской системой рядом с русским текстом появлялось
+    /// "3 hours ago". Поэтому локаль дат фиксируем явно.
+    private static let ruLocale = Locale(identifier: "ru_RU")
+
+    /// "3 часа назад", "вчера" — для карточки "Продолжить выбор".
+    var ruRelative: String {
+        formatted(.relative(presentation: .named).locale(Self.ruLocale))
+    }
+
+    /// "12 июля, 14:30" — для списков истории.
+    var ruShort: String {
+        formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Self.ruLocale))
+    }
+}
+
 extension Color {
     init(hex: String) {
         let scanner = Scanner(string: hex)
