@@ -1,0 +1,12 @@
+.DS_Store
+build/
+DerivedData/
+
+# Личное состояние Xcode (раскрытые папки, точки останова, последняя схема) —
+# сам .xcodeproj при этом коммитим, чтобы репозиторий открывался сразу,
+# без установки XcodeGen.
+xcuserdata/
+
+# Секреты: реальный ключ OpenAI. Рядом лежит Config.example.swift — его
+# копируют в Config.swift и вписывают свой ключ.
+MovieAssistant/Core/Services/Config.swift
